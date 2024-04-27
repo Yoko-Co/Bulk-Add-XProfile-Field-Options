@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ruleset name="BulkAddXProfileFieldOptions">
+    <config name="minimum_wp_version" value="6.2"/>
+    <rule ref="WordPress"/>
+</ruleset>
