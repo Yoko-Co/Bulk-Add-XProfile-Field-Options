@@ -4,6 +4,7 @@
  * Description: A utility plugin to bulk add options to BuddyPress XProfile fields.
  * Version: 0.1
  * Requires at least: 6.2
+ * Requires Plugins: buddypress
  * Author: Yoko Co
  * Author URI: https://yokoco.com
  * Text Domain: yoko-xprofile
