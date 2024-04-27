@@ -163,7 +163,7 @@ class BulkAddXProfileFieldOptions {
 			// Get the highest option order for the field.
 			$highest_option_order = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- this result may change with every run.
 				$wpdb->prepare(
-					'SELECT MAX(option_order) FROM %i WHERE parent_id = %d', // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder -- this is a valid identifier with our "Requires at least" version.
+					'SELECT MAX(option_order) FROM %i WHERE parent_id = %d',
 					$bp->profile->table_name_fields,
 					$field->id
 				)
