@@ -149,59 +149,11 @@ class BulkAddXProfileFieldOptions {
 
 		// Check if our nonce is set and verify it.
 		if (
-			! empty( $_POST['add_options_to_xprofile_field_nonce'] ) &&
-			! empty( $_POST['xprofile_field'] ) &&
-			! empty( $_POST['xprofile_field_options'] ) &&
-			wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['add_options_to_xprofile_field_nonce'] ) ), 'add_options_to_xprofile_field_action' )
+			empty( $_POST['add_options_to_xprofile_field_nonce'] ) ||
+			empty( $_POST['xprofile_field'] ) ||
+			empty( $_POST['xprofile_field_options'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['add_options_to_xprofile_field_nonce'] ) ), 'add_options_to_xprofile_field_action' )
 		) {
-			$xprofile_field = (int) sanitize_textarea_field( wp_unslash( $_POST['xprofile_field'] ) );
-			$new_options    = explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['xprofile_field_options'] ) ) );
-
-			// Get the XProfile field object.
-			$field = xprofile_get_field( $xprofile_field );
-
-			// Get the highest option order for the field.
-			$highest_option_order = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- this result may change with every run.
-				$wpdb->prepare(
-					'SELECT MAX(option_order) FROM %i WHERE parent_id = %d', // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder -- this is a valid identifier with our "Requires at least" version.
-					$bp->profile->table_name_fields,
-					$field->id
-				)
-			);
-
-			// If there are no existing options, set the highest option order to 0.
-			if ( ! $highest_option_order ) {
-				$highest_option_order = 0;
-			}
-
-			// Add the new field options.
-			$i = $highest_option_order;
-			foreach ( $new_options as $option ) {
-				xprofile_insert_field(
-					array(
-						'field_group_id' => $field->group_id,
-						'parent_id'      => $field->id,
-						'type'           => 'option',
-						'name'           => $option,
-						'option_order'   => ++$i,
-					)
-				);
-			}
-
-			// Redirect back to the settings page with a success message.
-			wp_safe_redirect(
-				add_query_arg(
-					array(
-						'page'    => 'bulk-add-xprofile-field-options',
-						'status'  => 'success',
-						'message' => 'Options added successfully.',
-						'nonce'   => $nonce,
-					),
-					admin_url( 'tools.php' )
-				)
-			);
-			exit;
-		} else {
 			// Redirect back with an error message if nonce verification fails.
 			wp_safe_redirect(
 				add_query_arg(
@@ -216,6 +168,54 @@ class BulkAddXProfileFieldOptions {
 			);
 			exit;
 		}
+
+		$xprofile_field = (int) sanitize_textarea_field( wp_unslash( $_POST['xprofile_field'] ) );
+		$new_options    = explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['xprofile_field_options'] ) ) );
+
+		// Get the XProfile field object.
+		$field = xprofile_get_field( $xprofile_field );
+
+		// Get the highest option order for the field.
+		$highest_option_order = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- this result may change with every run.
+			$wpdb->prepare(
+				'SELECT MAX(option_order) FROM %i WHERE parent_id = %d', // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder -- this is a valid identifier with our "Requires at least" version.
+				$bp->profile->table_name_fields,
+				$field->id
+			)
+		);
+
+		// If there are no existing options, set the highest option order to 0.
+		if ( ! $highest_option_order ) {
+			$highest_option_order = 0;
+		}
+
+		// Add the new field options.
+		$i = $highest_option_order;
+		foreach ( $new_options as $option ) {
+			xprofile_insert_field(
+				array(
+					'field_group_id' => $field->group_id,
+					'parent_id'      => $field->id,
+					'type'           => 'option',
+					'name'           => $option,
+					'option_order'   => ++$i,
+				)
+			);
+		}
+
+		// Redirect back to the settings page with a success message.
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'    => 'bulk-add-xprofile-field-options',
+					'status'  => 'success',
+					'message' => 'Options added successfully.',
+					'nonce'   => $nonce,
+				),
+				admin_url( 'tools.php' )
+			)
+		);
+		exit;
 	}
 }
 
